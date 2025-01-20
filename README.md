@@ -84,4 +84,4 @@ Si deseas contribuir a BeerCommerce, por favor revisa las guías de [contribuci�
 
 ---
 
-Este es un README adaptado a un e-commerce más simple para cervezas, conservando las tecnologías y estructura del ejemplo original pero haciendo más relevante el contexto del producto que se está vendiendo.
+
