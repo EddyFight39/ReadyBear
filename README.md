@@ -1,109 +1,87 @@
-AWS Serverless Ecommerce Platform
-=================================
 
-__Status__: _Work-in-progress. Please create issues or pull requests if you have ideas for improvement._
+# ReadyBeer
 
-The __Serverless Ecommerce Platform__ is a sample implementation of a serverless backend for an e-commerce website. Functionalities are split across multiple micro-services that communicate either through asynchronous messages over [Amazon EventBridge](https://aws.amazon.com/eventbridge/) or over synchronous APIs.
+## Descripción
 
-__This sample is not meant to be used as an e-commerce platform as-is, but as an inspiration on how to build event-driven serverless microservices on AWS.__ This makes lots of assumptions on the order flow that might not be suitable for most e-commerce platform and doesn't include many of the features that you might need for this.
+**BeerCommerce** es una implementación de ejemplo de una plataforma de comercio electrónico basada en arquitectura serverless. Está diseñada para vender cervezas en línea, permitiendo la gestión de usuarios, productos, pedidos, pagos y envíos.
 
-_Please note that you may incure AWS charges for deploying the ecommerce platform into your AWS account as not all services used are part of the [free tier](https://aws.amazon.com/free/) and you might exceed the free tier usage limit. To track costs in your AWS account, consider using [AWS Cost Explorer](https://aws.amazon.com/aws-cost-management/aws-cost-explorer/) and [AWS Billing and Cost Management](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/billing-what-is.html). You can also set up a [billing alarm](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/monitor_estimated_charges_with_cloudwatch.html) to get notified of unexpected charges._
+Este proyecto es solo una muestra de cómo se pueden construir microservicios serverless y no es una solución lista para usar. Está diseñado como referencia para aprender a implementar soluciones event-driven y serverless utilizando AWS.
 
-<p align="center">
-  <img src="docs/images/flow.png" alt="High-level flow across microservices"/>
-</p>
+_Por favor, ten en cuenta que al desplegar esta plataforma en tu cuenta de AWS, puedes generar cargos si superas los límites del nivel gratuito. Para monitorear tus costos, te recomendamos usar [AWS Cost Explorer](https://aws.amazon.com/aws-cost-management/aws-cost-explorer/)._
 
-## Getting started
+## Arquitectura
 
-To install the necessary tools and deploy this in your own AWS account, see the [getting started](docs/getting_started.md) guide in the documentation section.
+### Vista General
 
-## Architecture
+Este es un esquema de alto nivel de cómo interactúan los diferentes microservicios que componen la plataforma de BeerCommerce. Cada servicio está diseñado para gestionar una parte del proceso de compra de cerveza.
 
-### High-level architecture
+![Diagrama de flujo](docs/images/flow.png)
 
-This is a high-level view of how the different microservices interact with each other. Each service folder contains anarchitecture diagram with more details for that specific service.
+### Servicios Backend
 
-<p align="center">
-  <img src="docs/images/architecture.png" alt="High-level architecture diagram"/>
-</p>
+| Servicio        | Descripción                               |
+|-----------------|-------------------------------------------|
+| [usuarios](usuarios/)  | Gestión de usuarios, autenticación y autorización. |
+| [cervezas](cervezas/)  | Información sobre las cervezas disponibles para vender. |
+| [pedidos](pedidos/)    | Gestión de creación de pedidos y su seguimiento. |
+| [inventario](inventario/) | Gestión del inventario de cervezas y estado de existencias. |
+| [envio](envio/)        | Gestión de envíos y seguimiento de paquetes. |
+| [precios-envio](precios-envio/) | Cálculo de costos de envío para las cervezas. |
+| [pagos](pagos/)        | Gestión de cobros y reembolsos. |
 
-### Technologies used
+### Servicio Frontend
 
-__Communication/Messaging__:
+| Servicio       | Descripción                               |
+|----------------|-------------------------------------------|
+| [api-frontend](api-frontend/) | API para interactuar con los servicios del backend desde la interfaz de usuario. |
 
-* [AWS AppSync](https://aws.amazon.com/appsync/) for interactions between users and the ecommerce platform.
-* [Amazon API Gateway](https://aws.amazon.com/api-gateway/) for service-to-service synchronous communication (request/response).
-* [Amazon EventBridge](https://aws.amazon.com/eventbridge/) for service-to-service asynchronous communication (emitting and reacting to events).
+### Infraestructura
 
-__Authentication/Authorization__:
+| Servicio        | Descripción                               |
+|-----------------|-------------------------------------------|
+| [pipeline](pipeline/) | Pipeline CI/CD para despliegues automáticos. |
+| [plataforma](plataforma/) | Recursos fundamentales para desplegar los servicios del backend. |
 
-* [Amazon Cognito](https://aws.amazon.com/cognito/) for managing and authenticating users, and providing JSON web tokens used by services.
-* [AWS Identity and Access Management](https://aws.amazon.com/iam/) for service-to-service authorization, either between microservices (e.g. authorize to call an Amazon API Gateway REST endpoint), or within a microservice (e.g. granting a Lambda function the permission to read from a DynamoDB table).
+### Recursos Compartidos
 
-__Compute__:
+| Nombre       | Descripción                               |
+|--------------|-------------------------------------------|
+| [docs](docs/) | Documentación sobre cómo usar y contribuir al proyecto. |
+| [shared](shared/) | Recursos comunes accesibles para todos los servicios. |
 
-* [AWS Lambda](https://aws.amazon.com/lambda/) as serverless compute either behind APIs or to react to asynchronous events.
+## Tecnologías Utilizadas
 
-__Storage__:
+- **Comunicación**: 
+  - [AWS AppSync](https://aws.amazon.com/appsync/) para la interacción entre usuarios y la plataforma.
+  - [Amazon API Gateway](https://aws.amazon.com/api-gateway/) para la comunicación sincrónica entre microservicios.
+  - [Amazon EventBridge](https://aws.amazon.com/eventbridge/) para la comunicación asincrónica basada en eventos.
 
-* [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) as a scalable NoSQL database for persisting informations.
+- **Autenticación/Autorización**:
+  - [Amazon Cognito](https://aws.amazon.com/cognito/) para la gestión de usuarios y autenticación.
+  - [AWS IAM](https://aws.amazon.com/iam/) para la autorización de acceso entre microservicios.
 
-__CI/CD__:
+- **Cómputo**:
+  - [AWS Lambda](https://aws.amazon.com/lambda/) para ejecutar funciones serverless en respuesta a eventos o solicitudes API.
 
-* [AWS CloudFormation](https://aws.amazon.com/cloudformation/) with [AWS Serverless Application Model](https://aws.amazon.com/serverless/sam/) for defining AWS resources as code in most services.
-* [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) for defining AWS resources as code in the [payment-3p](payment-3p/) service.
-* [Amazon CodeCommit](https://aws.amazon.com/codecommit/) as a repository to trigger the CI/CD pipeline.
-* [Amazon CodeBuild](https://aws.amazon.com/codebuild/) for building artifacts for microservices and running tests.
-* [Amazon CodePipeline](https://aws.amazon.com/codepipeline/) for orchestrating the CI/CD pipeline to production.
+- **Almacenamiento**:
+  - [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) como base de datos NoSQL para almacenar información de productos, pedidos, usuarios, etc.
 
-__Monitoring__:
+- **CI/CD**:
+  - [AWS CloudFormation](https://aws.amazon.com/cloudformation/) para definir infraestructura como código.
+  - [Amazon CodePipeline](https://aws.amazon.com/codepipeline/) para automatizar despliegues.
 
-* [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/) for metrics, dashboards, log aggregation.
-* [AWS X-Ray](https://aws.amazon.com/xray/) for tracing across AWS services and across microservices.
+- **Monitoreo**:
+  - [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/) para la recolección de métricas y registros.
+  - [AWS X-Ray](https://aws.amazon.com/xray/) para realizar trazabilidad entre los microservicios.
 
-### Backend services
+## Documentación
 
-|  Services  | Description                               |
-|------------|-------------------------------------------|
-| [users](users/) | Provides user management, authentication and authorization. |
-| [products](products/) | Source of truth for products information. |
-| [orders](orders/) | Manages order creation and status. |
-| [warehouse](warehouse/) | Manages inventory and packaging orders. |
-| [delivery](delivery/) | Manages shipping and tracking packages. |
-| [delivery-pricing](delivery-pricing/) | Pricing calculator for deliveries. |
-| [payment](payment/) | Manages payment collection and refunds. |
-| [payment-3p](payment-3p/) | Simulates a third party payment system. |
+Consulta la [documentación](docs/) para obtener más información sobre cómo empezar, cómo utilizar los servicios y cómo contribuir al proyecto.
 
-### Frontend service
+## Contribuir
 
-|  Services  | Description                               |
-|------------|-------------------------------------------|
-| [frontend-api](frontend-api/) | User-facing API for interacting with the services. |
+Si deseas contribuir a BeerCommerce, por favor revisa las guías de [contribución](CONTRIBUTING.md) y de [cómo empezar](docs/getting_started.md) para comenzar.
 
-### Infrastructure services
+---
 
-|  Services  | Description                               |
-|------------|-------------------------------------------|
-| [pipeline](pipeline/) | CI/CD pipeline for deploying the resources in production. |
-| [platform](platform/) | Core platform resources for deploying backend services. |
-
-### Shared resources
-
-| Name       | Description                               |
-|------------|-------------------------------------------|
-| [docs](docs/) | Documentation application for all services. |
-| [shared](shared/) | Shared resources accessible for all services, such as common CloudFormation templates and OpenAPI schemas. |
-| [tools](tools/) | Tools used to build services.             |
-
-
-## Documentation
-
-See the [docs](docs/) folder for the documentation.
-
-## Contributing
-
-See the [contributing](CONTRIBUTING.md) and [getting started](docs/getting_started.md) documents to learn how to contribute to this project.
-
-## License
-
-This library is licensed under the MIT-0 License. See the LICENSE file.
+Este es un README adaptado a un e-commerce más simple para cervezas, conservando las tecnologías y estructura del ejemplo original pero haciendo más relevante el contexto del producto que se está vendiendo.
