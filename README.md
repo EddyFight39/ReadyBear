@@ -15,7 +15,7 @@ _Por favor, ten en cuenta que al desplegar esta plataforma en tu cuenta de AWS, 
 
 Este es un esquema de alto nivel de cómo interactúan los diferentes microservicios que componen la plataforma de BeerCommerce. Cada servicio está diseñado para gestionar una parte del proceso de compra de cerveza.
 
-![Diagrama de flujo](docs/images/flow.png)
+
 
 ### Servicios Backend
 
